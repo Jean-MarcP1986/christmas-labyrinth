@@ -1,82 +1,156 @@
 <!DOCTYPE html>
-{q:"You light me but I am not a fire. What am I?", a:"candle"},
-{q:"I pull Santa's sleigh through the sky. What am I?", a:"reindeer"}
-],
-fr: [
-{q:"Je tombe du ciel et rends les enfants heureux. Qui suis-je ?", a:"neige"},
-{q:"J'ai des aiguilles mais je ne pique pas. Qui suis-je ?", a:"horloge"},
-{q:"Je suis porté mais je ne suis pas un cadeau, je tiens chaud. Qui suis-je ?", a:"écharpe"},
-{q:"Je brille en haut du sapin de Noël. Qui suis-je ?", a:"étoile"},
-{q:"Je dis ho ho ho et j'apporte des cadeaux. Qui suis-je ?", a:"père noël"},
-{q:"Je sonne sans téléphone. Qui suis-je ?", a:"cloche"},
-{q:"Je suis vert et je sens bon en décembre. Qui suis-je ?", a:"sapin"},
-{q:"Je suis sucré, rouge et blanc, en forme de canne. Qui suis-je ?", a:"sucre d'orge"},
-{q:"On m'allume mais je ne suis pas un feu. Qui suis-je ?", a:"bougie"},
-{q:"Je tire le traîneau du Père Noël. Qui suis-je ?", a:"renne"}
-]
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Christmas Labyrinth / Labyrinthe de Noël</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background:#0b3d2e;
+      color:#fff;
+      text-align:center;
+      padding:20px;
+    }
+    .maze {
+      display:grid;
+      grid-template-columns: repeat(5, 60px);
+      gap:10px;
+      justify-content:center;
+      margin-bottom:20px;
+    }
+    .cell {
+      width:60px;
+      height:60px;
+      background:#1e7f5c;
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:bold;
+    }
+    .active { background:#ffd966; color:#000; }
+    .done { background:#2ecc71; }
+    .room {
+      max-width:600px;
+      margin:0 auto;
+      background:#145a44;
+      padding:20px;
+      border-radius:12px;
+    }
+    input { padding:10px; width:80%; }
+    button { padding:10px 20px; margin-top:10px; }
+  </style>
+</head>
+
+<body>
+
+<button onclick="toggleMusic()">🔊 Music ON / OFF</button>
+<br><br>
+
+<button onclick="setLang('en')">English</button>
+<button onclick="setLang('fr')">Français</button>
+
+<audio id="bgm" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/11/22/audio_5c8b7a0d66.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="success">
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9f7f28b78b.mp3" type="audio/mpeg">
+</audio>
+
+<div class="maze" id="maze"></div>
+<div class="room" id="game"></div>
+
+<script>
+const riddles = {
+  en: [
+    {q:"I fall from the sky and make children cheer. What am I?", a:"snow"},
+    {q:"I have hands but cannot clap. What am I?", a:"clock"},
+    {q:"I am wrapped but not a gift, I keep you warm. What am I?", a:"scarf"},
+    {q:"I shine on top of the Christmas tree. What am I?", a:"star"},
+    {q:"I go ho ho ho and bring gifts. Who am I?", a:"santa"},
+    {q:"I ring without a phone. What am I?", a:"bell"},
+    {q:"I am green and smell good in December. What am I?", a:"tree"},
+    {q:"I am sweet, red and white, shaped like a hook. What am I?", a:"candy cane"},
+    {q:"You light me but I am not a fire. What am I?", a:"candle"},
+    {q:"I pull Santa's sleigh through the sky. What am I?", a:"reindeer"}
+  ],
+  fr: [
+    {q:"Je tombe du ciel et rends les enfants heureux. Qui suis-je ?", a:"neige"},
+    {q:"J'ai des aiguilles mais je ne pique pas. Qui suis-je ?", a:"horloge"},
+    {q:"Je suis porté mais je ne suis pas un cadeau, je tiens chaud. Qui suis-je ?", a:"écharpe"},
+    {q:"Je brille en haut du sapin de Noël. Qui suis-je ?", a:"étoile"},
+    {q:"Je dis ho ho ho et j'apporte des cadeaux. Qui suis-je ?", a:"père noël"},
+    {q:"Je sonne sans téléphone. Qui suis-je ?", a:"cloche"},
+    {q:"Je suis vert et je sens bon en décembre. Qui suis-je ?", a:"sapin"},
+    {q:"Je suis sucré, rouge et blanc, en forme de canne. Qui suis-je ?", a:"sucre d'orge"},
+    {q:"On m'allume mais je ne suis pas un feu. Qui suis-je ?", a:"bougie"},
+    {q:"Je tire le traîneau du Père Noël. Qui suis-je ?", a:"renne"}
+  ]
 };
 
-
 let lang = 'en';
-let musicOn = true;
 let room = 0;
-
+let musicOn = false;
 
 function toggleMusic() {
-const bgm = document.getElementById('bgm');
-musicOn = !musicOn;
-if (musicOn) bgm.play(); else bgm.pause();
+  const bgm = document.getElementById('bgm');
+  musicOn = !musicOn;
+  musicOn ? bgm.play() : bgm.pause();
 }
-
 
 function setLang(l) {
-lang = l;
-room = 0;
-render();
+  lang = l;
+  room = 0;
+  render();
 }
-
 
 function drawMaze() {
-const maze = document.getElementById('maze');
-maze.innerHTML = '';
-for (let i = 0; i < 10; i++) {
-const cell = document.createElement('div');
-cell.className = 'cell';
-if (i < room) cell.classList.add('done');
-if (i === room) cell.classList.add('active');
-cell.textContent = i + 1;
-maze.appendChild(cell);
+  const maze = document.getElementById('maze');
+  maze.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    if (i < room) cell.classList.add('done');
+    if (i === room) cell.classList.add('active');
+    cell.textContent = i + 1;
+    maze.appendChild(cell);
+  }
 }
-}
-
 
 function render() {
-drawMaze();
-const game = document.getElementById('game');
-if (room < 10) {
-game.innerHTML = `
-<h2>${lang==='en' ? 'Room' : 'Salle'} ${room+1} / 10</h2>
-<p>${riddles[lang][room].q}</p>
-<input id="answer" placeholder="${lang==='en'?'Your answer':'Votre réponse'}" />
-<br />
-<button onclick="check()">OK</button>
-`;
-} else {
-game.innerHTML = `
-<h2>${lang==='en'?'Congratulations!':'Félicitations !'}</h2>
-<p>${lang==='en'?'You escaped the Christmas labyrinth. Your passcode is:':'Vous avez terminé le labyrinthe de Noël. Votre code est :'}</p>
-<h3>🎄 SOCIAL-NOEL-25 🎄</h3>
-`;
+  drawMaze();
+  const game = document.getElementById('game');
+  if (room < 10) {
+    game.innerHTML = `
+      <h2>${lang === 'en' ? 'Room' : 'Salle'} ${room+1} / 10</h2>
+      <p>${riddles[lang][room].q}</p>
+      <input id="answer">
+      <br>
+      <button onclick="check()">OK</button>
+    `;
+  } else {
+    game.innerHTML = `
+      <h2>🎄 Congratulations! 🎄</h2>
+      <p>Your passcode:</p>
+      <h3>SOCIAL-NOEL-25</h3>
+    `;
+  }
 }
-}
-
 
 function check() {
-const val = document.getElementById('answer').value.toLowerCase().trim();
-if (val === riddles[lang][room].a) {
-document.getElementById('success').play();
-room++;
-render();
-} else {
-alert(lang==='en'?'Wrong answer, try again!':'Mauvaise réponse, essayez encore !');
+  const val = document.getElementById('answer').value.toLowerCase().trim();
+  if (val === riddles[lang][room].a) {
+    document.getElementById('success').play();
+    room++;
+    render();
+  } else {
+    alert(lang === 'en' ? 'Wrong answer!' : 'Mauvaise réponse !');
+  }
 }
+
+render();
+</script>
+
+</body>
+</html>
